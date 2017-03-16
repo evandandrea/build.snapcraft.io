@@ -57,6 +57,7 @@
     "memcached": "^2.2.2",
     "moment": "^2.17.1",
     "normalize.css": "^5.0.0",
+    "normalizr": "^3.2.2",
     "oauth": "^0.9.14",
     "openid": "^2.0.6",
     "parse-github-url": "^0.3.2",
