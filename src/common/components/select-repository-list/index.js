@@ -61,10 +61,14 @@ export class SelectRepositoryListComponent extends Component {
     }
   }
 
-  renderRepository(repo) {
+  renderRepository(id) {
+    // new selector
+    const repository = this.props.getRepositoryById(id);
+    /**
     const { fullName, enabled } = repo;
     const status = this.props.repositoriesStatus[fullName] || {};
     const { selectedRepos } = this.props.selectRepositoriesForm;
+    **/
 
     return (
       <SelectRepositoryRow
@@ -95,6 +99,7 @@ export class SelectRepositoryListComponent extends Component {
     this.props.dispatch(fetchUserRepositories(pageNumber));
   }
 
+  // XXX selector
   filterEnabledRepos(repositories) {
     const { success, snaps } = this.props.snaps;
 
@@ -127,7 +132,7 @@ export class SelectRepositoryListComponent extends Component {
 
     // XXX if not success, then what? we lose the previously good list of repos?
     if (success) {
-      renderedRepos = this.props.repositories.repos.map(this.renderRepository.bind(this));
+      renderedRepos = this.props.repositories.ids.map(this.renderRepository.bind(this));
     }
 
     return (
@@ -136,10 +141,10 @@ export class SelectRepositoryListComponent extends Component {
           <div className={ spinnerStyles }><Spinner /></div>
         }
         { renderedRepos }
-        { pageLinks }
+        {/* { pageLinks } */}
         <div className={ styles.footer }>
           <HeadingThree>
-            { selectedRepos.length } selected
+            {/* { selectedRepos.length } selected */}
           </HeadingThree>
           <div className={ styles['footer-right'] }>
             <div className={ styles['button-wrapper'] }>
