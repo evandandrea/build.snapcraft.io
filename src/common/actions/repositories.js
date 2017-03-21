@@ -5,14 +5,22 @@ import { conf } from '../helpers/config';
 
 const BASE_URL = conf.get('BASE_URL');
 
+export const REPOSITORIES_REQUEST = 'REPOSITORIES_REQUEST';
+export const REPOSITORIES_SUCCESS = 'REPOSITORIES_SUCCESS';
+export const REPOSITORIES_FAILURE = 'REPOSITORIES_FAILURE';
+
+export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE';
+
+/**
 export const FETCH_REPOSITORIES = 'FETCH_ALL_REPOSITORIES';
 export const FETCH_REPOSITORIES_ERROR = 'FETCH_REPOSITORIES_ERROR';
 export const SET_REPOSITORIES = 'SET_REPOSITORIES';
 export const SET_REPOSITORY_PAGE_LINKS = 'SET_REPOSITORY_PAGE_LINKS';
+ **/
 
 export function setRepositories(repos) {
   return {
-    type: SET_REPOSITORIES,
+    type: REPOSITORIES_SUCCESS,
     payload: repos
   };
 }
@@ -22,7 +30,7 @@ export function fetchUserRepositories(pageNumber) {
     let urlParts = [BASE_URL, 'api/github/repos'];
 
     dispatch({
-      type: FETCH_REPOSITORIES
+      type: REPOSITORIES_REQUEST
     });
 
     if (pageNumber) {
@@ -39,10 +47,9 @@ export function fetchUserRepositories(pageNumber) {
       if (result.status !== 'success') {
         throw getError(response, result);
       }
-      dispatch(setRepositories({
-        repos: result.payload.repos,
-        links: result.pageLinks
-      }));
+
+      // XXX deleted chunk should be handled in reducer?
+      dispatch(setRepositories(result));
     } catch (error) {
       // TODO: Replace with logging helper
       console.warn(error); // eslint-disable-line no-console
@@ -53,7 +60,7 @@ export function fetchUserRepositories(pageNumber) {
 
 export function fetchRepositoriesError(error) {
   return {
-    type: FETCH_REPOSITORIES_ERROR,
+    type: REPOSITORIES_FAILURE,
     payload: error,
     error: true
   };

@@ -39,6 +39,7 @@ class SelectRepositoriesPage extends Component {
   }
 
   render() {
+    // XXX this should fetch snaps and repos and pass to children ?
     const { snaps, snapBuilds } = this.props;
     return (
       <div>

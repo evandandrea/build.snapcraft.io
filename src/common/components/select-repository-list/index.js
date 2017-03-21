@@ -118,13 +118,14 @@ export class SelectRepositoryListComponent extends Component {
 
   render() {
     const isLoading = this.props.repositories.isFetching;
-    const { selectedRepos } = this.props.selectRepositoriesForm;
+    //const { selectedRepos } = this.props.selectRepositoriesForm;
     const { repos, success } = this.props.repositories;
-    const pageLinks = this.renderPageLinks.call(this);
+    //const pageLinks = this.renderPageLinks.call(this);
 
-    this.filterEnabledRepos(repos);
+    //this.filterEnabledRepos(repos);
     let renderedRepos = null;
 
+    // XXX if not success, then what? we lose the previously good list of repos?
     if (success) {
       renderedRepos = this.props.repositories.repos.map(this.renderRepository.bind(this));
     }
