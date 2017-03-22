@@ -13,7 +13,7 @@ import Spinner from '../spinner';
 import PageLinks from '../page-links';
 import Button, { LinkButton } from '../vanilla/button';
 import { HeadingThree } from '../vanilla/heading';
-import { fetchUserRepositories } from '../../actions/repositories';
+import { selectRepository, fetchUserRepositories } from '../../actions/repositories';
 import { hasRepository } from '../../helpers/repositories';
 import styles from './styles.css';
 
@@ -62,30 +62,30 @@ export class SelectRepositoryListComponent extends Component {
   }
 
   renderRepository(id) {
-    // new selector
-    const repository = this.props.getRepositoryById(id);
-    /**
-    const { fullName, enabled } = repo;
-    const status = this.props.repositoriesStatus[fullName] || {};
-    const { selectedRepos } = this.props.selectRepositoriesForm;
-    **/
+    const repository = this.props.entities.repos[id];
+    const { full_name, enabled } = repository;
+
+    const isSelected = this.props.repositories.selected.indexOf(id) !== -1;
+
+    //const status = this.props.repositoriesStatus[fullName] || {};
+    //const { selectedRepos } = this.props.selectRepositoriesForm;
 
     return (
       <SelectRepositoryRow
-        key={ `repo_${repo.fullName}` }
-        repository={ repo }
-        buttonLabel={ status.isFetching ? 'Creating...' : 'Create' }
-        buttonDisabled={ status.isFetching }
-        onChange={ this.onSelectRepository.bind(this, repo) }
+        key={ `repo_${full_name}` }
+        repository={ repository }
+        onChange={ this.onSelectRepository.bind(this, id) }
         errorMsg= { this.getErrorMessage(status.error) }
-        checked={ hasRepository(selectedRepos, repo) }
+        checked={ isSelected }
         isEnabled={ enabled }
       />
     );
   }
 
-  onSelectRepository(repository) {
-    this.props.dispatch(toggleRepository(repository));
+  onSelectRepository(id, event) {
+    event.stopPropagation();
+
+    this.props.dispatch(selectRepository(id));
   }
 
   onSubmit() {
@@ -99,8 +99,9 @@ export class SelectRepositoryListComponent extends Component {
     this.props.dispatch(fetchUserRepositories(pageNumber));
   }
 
-  // XXX selector
+  // TODO make selector getEnabledRepositories
   filterEnabledRepos(repositories) {
+    // XXX why check success?
     const { success, snaps } = this.props.snaps;
 
     if (success && snaps.length) {
@@ -123,16 +124,20 @@ export class SelectRepositoryListComponent extends Component {
 
   render() {
     const isLoading = this.props.repositories.isFetching;
-    //const { selectedRepos } = this.props.selectRepositoriesForm;
-    const { repos, success } = this.props.repositories;
+    const { selected } = this.props.repositories;
+    const { ids, error } = this.props.repositories;
     //const pageLinks = this.renderPageLinks.call(this);
 
     //this.filterEnabledRepos(repos);
     let renderedRepos = null;
 
     // XXX if not success, then what? we lose the previously good list of repos?
-    if (success) {
-      renderedRepos = this.props.repositories.ids.map(this.renderRepository.bind(this));
+    if (!error) {
+      renderedRepos = ids.map((id) => {
+        return this.renderRepository(id);
+      });
+    } else {
+      // TODO show error message and keep old repo list
     }
 
     return (
@@ -144,11 +149,11 @@ export class SelectRepositoryListComponent extends Component {
         {/* { pageLinks } */}
         <div className={ styles.footer }>
           <HeadingThree>
-            {/* { selectedRepos.length } selected */}
+            { selected.length } selected }
           </HeadingThree>
           <div className={ styles['footer-right'] }>
             <div className={ styles['button-wrapper'] }>
-              { repos && repos.length > 0 &&
+              { ids && ids.length > 0 &&
                 <LinkButton appearance="neutral" to="/dashboard">
                   Cancel
                 </LinkButton>
@@ -178,18 +183,20 @@ export class SelectRepositoryListComponent extends Component {
 }
 
 SelectRepositoryListComponent.propTypes = {
-  snaps: PropTypes.object,
+  dispatch: PropTypes.func.isRequired,
+  entities: PropTypes.object.isRequired,
+  onSelectRepository: PropTypes.func,
   repositories: PropTypes.object,
   repositoriesStatus: PropTypes.object,
-  selectRepositoriesForm: PropTypes.object,
-  onSelectRepository: PropTypes.func,
   router: PropTypes.object.isRequired,
-  dispatch: PropTypes.func.isRequired
+  selectRepositoriesForm: PropTypes.object,
+  snaps: PropTypes.object
 };
 
 function mapStateToProps(state) {
   const {
     snaps,
+    entities,
     repositories,
     repositoriesStatus,
     selectRepositoriesForm
@@ -197,7 +204,8 @@ function mapStateToProps(state) {
 
   return {
     snaps,
-    repositories,
+    entities,
+    repositories, // ?repository-pagination
     repositoriesStatus,
     selectRepositoriesForm
   };

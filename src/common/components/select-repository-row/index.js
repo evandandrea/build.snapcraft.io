@@ -20,18 +20,15 @@ class SelectRepositoryRow extends Component {
     });
 
     return (
-      <div className={ rowClass }>
-        { onChange &&
-          <input
-            id={ repository.fullName }
-            type="checkbox"
-            onChange={ this.onChange.bind(this) }
-            checked={ checked || isEnabled }
-            disabled={ isEnabled }
-          />
-        }
+      <div className={ rowClass } onChange={ onChange }>
+        <input
+          id={ repository.full_name }
+          type="checkbox"
+          checked={ checked || isEnabled }
+          disabled={ isEnabled }
+        />
         <div>
-          <label htmlFor={ repository.fullName }>{repository.fullName}</label>
+          <label htmlFor={ repository.full_name }>{repository.full_name}</label>
         </div>
         { errorMsg &&
           <div className={ styles.errorMessage }>
@@ -40,10 +37,6 @@ class SelectRepositoryRow extends Component {
         }
       </div>
     );
-  }
-
-  onChange(event) {
-    this.props.onChange(event);
   }
 }
 
@@ -55,7 +48,7 @@ SelectRepositoryRow.defaultProps = {
 SelectRepositoryRow.propTypes = {
   errorMsg: PropTypes.node,
   repository: PropTypes.shape({
-    fullName: PropTypes.string.isRequired
+    full_name: PropTypes.string.isRequired
   }).isRequired,
   checked: PropTypes.bool,
   isEnabled: PropTypes.bool,

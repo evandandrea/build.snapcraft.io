@@ -1,9 +1,11 @@
 import merge from 'lodash/merge';
 import union from 'lodash/union';
+import without from 'lodash/without';
 
 
 import * as ActionTypes from '../actions/repositories';
 
+// XXX move to entities.js
 export function entities(state = { snaps: {}, repos: {} }, action) {
   if (action.payload && action.payload.entities) {
     return merge({}, state, action.payload.entities);
@@ -12,23 +14,12 @@ export function entities(state = { snaps: {}, repos: {} }, action) {
   return state;
 }
 
-export function errorMessage(state = null, action) {
-  const { type, error } = action;
-
-  if (type === ActionTypes.RESET_ERROR_MESSAGE) {
-    return null;
-  } else if (error) {
-    return error;
-  }
-
-  return state;
-}
-
-export function repositories(state= {
+export function repositories(state = {
   isFetching: false,
   //success: false, // implicit in !!error
   error: false,
   ids: [],
+  selected: [],
   pageLinks: {}
 }, action) {
 
@@ -42,58 +33,33 @@ export function repositories(state= {
       return {
         ...state,
         isFetching: false,
+        error: false,
         ids: union(state.ids, action.payload.result)
         //TODO handle pagination nextPageUrl: action.response.nextPageUrl
       };
     case ActionTypes.REPOSITORIES_FAILURE:
       return {
         ...state,
-        isFetching: false
+        isFetching: false,
+        error: action.payload,
       };
-    default:
-      return state;
-  }
-}
+    case ActionTypes.REPOSITORIES_SELECT: {
+      const isSelected = state.selected.indexOf(action.payload) !== -1;
 
-/**
-export function repositories(state = {
-  isFetching: false,
-  success: false,
-  error: null,
-  repos: [],
-  pageLinks: {}
-}, action) {
-  switch(action.type) {
-    case ActionTypes.REPOSITORIES_REQUEST:
+      // if is in selected list remove it, if not add it
       return {
         ...state,
-        isFetching: true
+        selected: isSelected
+        ? without(state.selected, action.payload)
+        : state.selected.concat(action.payload)
       };
-    case ActionTypes.REPOSITORIES_SUCCESS:
+    }
+    case ActionTypes.REPOSITORIES_SELECT_CLEAR:
       return {
         ...state,
-        isFetching: false,
-        success: true,
-        error: null,
-        repos: action.payload.repos.map((repo) => {
-          return {
-            // parse repository info to keep consistent data format
-            ...parseGitHubRepoUrl(repo.full_name),
-            // but keep full repo data from API in the store too
-            repo
-          };
-        }),
-        pageLinks: action.payload.links
-      };
-    case ActionTypes.REPOSITORIES_FAILURE:
-      return {
-        ...state,
-        isFetching: false,
-        success: false,
-        error: action.payload
+        selected: []
       };
     default:
       return state;
   }
 }
-**/

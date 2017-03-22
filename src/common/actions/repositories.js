@@ -9,14 +9,22 @@ export const REPOSITORIES_REQUEST = 'REPOSITORIES_REQUEST';
 export const REPOSITORIES_SUCCESS = 'REPOSITORIES_SUCCESS';
 export const REPOSITORIES_FAILURE = 'REPOSITORIES_FAILURE';
 
-export const RESET_ERROR_MESSAGE = 'RESET_ERROR_MESSAGE';
+export const REPOSITORIES_SELECT = 'REPOSITORIES_SELECT';
 
 /**
 export const FETCH_REPOSITORIES = 'FETCH_ALL_REPOSITORIES';
 export const FETCH_REPOSITORIES_ERROR = 'FETCH_REPOSITORIES_ERROR';
 export const SET_REPOSITORIES = 'SET_REPOSITORIES';
+// not an action, should be part of SUCCESS reducer
 export const SET_REPOSITORY_PAGE_LINKS = 'SET_REPOSITORY_PAGE_LINKS';
  **/
+
+export function selectRepository(id) {
+  return {
+    type: REPOSITORIES_SELECT,
+    payload: id
+  };
+}
 
 export function setRepositories(repos) {
   return {

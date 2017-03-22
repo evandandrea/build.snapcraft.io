@@ -1,10 +1,10 @@
 export const TOGGLE_REPOSITORY = 'TOGGLE_REPOSITORY';
 export const UNSELECT_ALL_REPOSITORIES = 'UNSELECT_ALL_REPOSITORIES';
 
-export const toggleRepository = (repository) => {
+export const toggleRepository = (id) => {
   return {
     type: TOGGLE_REPOSITORY,
-    payload: repository
+    payload: id
   };
 };
 
