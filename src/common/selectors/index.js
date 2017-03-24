@@ -2,6 +2,8 @@ import { createSelector } from 'reselect';
 
 import { parseGitHubRepoUrl } from '../helpers/github-url';
 
+const getRepositoriesIndex = state => state.repositories.ids;
+const getRepositoriesEntities = state => state.entities.repos;
 const getSnaps = state => state.snaps;
 const getSnapBuilds = state => state.snapBuilds;
 
@@ -42,6 +44,18 @@ export const hasNoConfiguredSnaps = createSelector(
     return snaps.snaps ? !snaps.snaps.some((snap) => {
       return snap.snapcraft_data;
     }) : true;
+  }
+);
+
+/**
+ * @returns {Array} get selected repositories
+ */
+export const getSelectedRepositories = createSelector(
+  [getRepositoriesIndex, getRepositoriesEntities],
+  (repos, entities) => {
+    return repos.filter((id) => {
+      return entities[id].__isSelected;
+    });
   }
 );
 

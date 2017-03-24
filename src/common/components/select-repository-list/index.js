@@ -5,7 +5,6 @@ import { withRouter } from 'react-router';
 import { conf } from '../../helpers/config';
 import { createSnaps, createSnapsClear } from '../../actions/create-snap';
 import {
-  toggleRepository,
   unselectAllRepositories
 } from '../../actions/select-repositories-form';
 import SelectRepositoryRow from '../select-repository-row';
@@ -14,7 +13,7 @@ import PageLinks from '../page-links';
 import Button, { LinkButton } from '../vanilla/button';
 import { HeadingThree } from '../vanilla/heading';
 import { selectRepository, fetchUserRepositories } from '../../actions/repositories';
-import { hasRepository } from '../../helpers/repositories';
+import { getSelectedRepositories } from '../../selectors/index.js';
 import styles from './styles.css';
 
 // loading container styles not to duplicate .spinner class
@@ -65,7 +64,7 @@ export class SelectRepositoryListComponent extends Component {
     const repository = this.props.entities.repos[id];
     const { full_name, enabled } = repository;
 
-    const isSelected = this.props.repositories.selected.indexOf(id) !== -1;
+    //const isSelected = this.props.repositories.selected.indexOf(id) !== -1;
 
     //const status = this.props.repositoriesStatus[fullName] || {};
     //const { selectedRepos } = this.props.selectRepositoriesForm;
@@ -76,15 +75,12 @@ export class SelectRepositoryListComponent extends Component {
         repository={ repository }
         onChange={ this.onSelectRepository.bind(this, id) }
         errorMsg= { this.getErrorMessage(status.error) }
-        checked={ isSelected }
         isEnabled={ enabled }
       />
     );
   }
 
-  onSelectRepository(id, event) {
-    event.stopPropagation();
-
+  onSelectRepository(id) {
     this.props.dispatch(selectRepository(id));
   }
 
@@ -122,34 +118,52 @@ export class SelectRepositoryListComponent extends Component {
     return repositories;
   }
 
+  pageSlice(array, pageLinks) {
+    const PAGE_SIZE = 30; // XXX move to config or state
+    const { next, prev } = pageLinks;
+    let out = [];
+
+    if (next) {
+      out = array.slice((next - 2) * PAGE_SIZE, (next - 1) * PAGE_SIZE - 1);
+    } else if (prev) {
+      out = array.slice(prev * 30);
+    } else {
+      out = array;
+    }
+
+    return out;
+  }
+
   render() {
-    const isLoading = this.props.repositories.isFetching;
-    const { selected } = this.props.repositories;
-    const { ids, error } = this.props.repositories;
-    //const pageLinks = this.renderPageLinks.call(this);
+    const { selectedRepositories } = this.props;
+    const { ids, error, isFetching, pageLinks } = this.props.repositories;
+    const pagination = this.renderPageLinks(pageLinks);
 
     //this.filterEnabledRepos(repos);
     let renderedRepos = null;
 
+
     // XXX if not success, then what? we lose the previously good list of repos?
     if (!error) {
-      renderedRepos = ids.map((id) => {
-        return this.renderRepository(id);
-      });
+
+      renderedRepos = this.pageSlice(ids, pageLinks)
+        .map((id) => {
+          return this.renderRepository(id);
+        });
     } else {
       // TODO show error message and keep old repo list
     }
 
     return (
       <div>
-        { isLoading &&
+        { isFetching &&
           <div className={ spinnerStyles }><Spinner /></div>
         }
         { renderedRepos }
-        {/* { pageLinks } */}
+        { pagination }
         <div className={ styles.footer }>
           <HeadingThree>
-            { selected.length } selected }
+            { selectedRepositories.length } selected
           </HeadingThree>
           <div className={ styles['footer-right'] }>
             <div className={ styles['button-wrapper'] }>
@@ -170,9 +184,8 @@ export class SelectRepositoryListComponent extends Component {
     );
   }
 
-  renderPageLinks() {
-    const pageLinks = this.props.repositories.pageLinks;
-    if (this.props.repositories.success && pageLinks) {
+  renderPageLinks(pageLinks) {
+    if (pageLinks) {
       return (
         <div className={ styles['page-links-container'] }>
           <PageLinks { ...pageLinks } onClick={ this.onPageLinkClick.bind(this) } />
@@ -189,8 +202,8 @@ SelectRepositoryListComponent.propTypes = {
   repositories: PropTypes.object,
   repositoriesStatus: PropTypes.object,
   router: PropTypes.object.isRequired,
-  selectRepositoriesForm: PropTypes.object,
-  snaps: PropTypes.object
+  snaps: PropTypes.object,
+  selectedRepositories: PropTypes.array
 };
 
 function mapStateToProps(state) {
@@ -198,8 +211,7 @@ function mapStateToProps(state) {
     snaps,
     entities,
     repositories,
-    repositoriesStatus,
-    selectRepositoriesForm
+    repositoriesStatus
   } = state;
 
   return {
@@ -207,7 +219,7 @@ function mapStateToProps(state) {
     entities,
     repositories, // ?repository-pagination
     repositoriesStatus,
-    selectRepositoriesForm
+    selectedRepositories: getSelectedRepositories(state)
   };
 }
 

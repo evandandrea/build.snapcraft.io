@@ -4,14 +4,16 @@ import classNames from 'classnames';
 import styles from './selectRepositoryRow.css';
 
 class SelectRepositoryRow extends Component {
+
   render() {
     const {
       errorMsg,
       repository,
       onChange,
-      checked,
       isEnabled
     } = this.props;
+
+    const isChecked = repository.__isSelected;
 
     const rowClass = classNames({
       [styles.repositoryRow]: true,
@@ -20,11 +22,12 @@ class SelectRepositoryRow extends Component {
     });
 
     return (
-      <div className={ rowClass } onChange={ onChange }>
+      <div className={ rowClass }>
         <input
           id={ repository.full_name }
           type="checkbox"
-          checked={ checked || isEnabled }
+          checked={ isChecked || isEnabled }
+          onChange={ onChange }
           disabled={ isEnabled }
         />
         <div>
@@ -41,7 +44,7 @@ class SelectRepositoryRow extends Component {
 }
 
 SelectRepositoryRow.defaultProps = {
-  checked: false,
+  __isSelected: false,
   isEnabled: false
 };
 
@@ -50,9 +53,9 @@ SelectRepositoryRow.propTypes = {
   repository: PropTypes.shape({
     full_name: PropTypes.string.isRequired
   }).isRequired,
-  checked: PropTypes.bool,
   isEnabled: PropTypes.bool,
-  onChange: PropTypes.func
+  onChange: PropTypes.func,
+  __isSelected: PropTypes.bool
 };
 
 export default SelectRepositoryRow;
