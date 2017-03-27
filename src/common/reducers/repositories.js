@@ -12,8 +12,13 @@ export function entities(state = { repos: {} }, action) {
     return merge({}, state, action.payload.entities);
   }
 
+  const reposInitialState = {
+    __isFetching: false,
+    __error: null
+  };
+
   switch(action.type) {
-    case ActionTypes.REPOSITORY_SELECT: {
+    case ActionTypes.REPOSITORY_TOGGLE_SELECT: {
       const wasSelected = state.repos[action.payload].__isSelected;
 
       return {
@@ -22,7 +27,46 @@ export function entities(state = { repos: {} }, action) {
           ...state.repos,
           [action.payload]: {
             ...state.repos[action.payload] || {},
+            ...reposInitialState, // clear state from building by deselecting
             __isSelected: !wasSelected
+          }
+        }
+      };
+    }
+    case ActionTypes.REPOSITORY_BUILD: {
+      return {
+        ...state,
+        repos: {
+          ...state.repos,
+          [action.payload]: {
+            ...state.repos[action.payload] || {},
+            ...reposInitialState,
+            __isFetching: true,
+          }
+        }
+      };
+    }
+    case ActionTypes.REPOSITORY_SUCCESS: {
+      return {
+        ...state,
+        repos: {
+          ...state.repos,
+          [action.payload]: {
+            ...state.repos[action.payload] || {},
+            ...reposInitialState
+          }
+        }
+      };
+    }
+    case ActionTypes.REPOSITORY_ERROR: {
+      return {
+        ...state,
+        repos: {
+          ...state.repos,
+          [action.payload]: {
+            ...state.repos[action.payload] || {},
+            ...reposInitialState,
+            __error: action.payload.error
           }
         }
       };

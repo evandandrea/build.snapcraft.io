@@ -61,35 +61,42 @@ export function fetchRepositoriesError(error) {
 
 // XXX move to repository actions?
 // could be plural or singular, could be in one module or two, might be clearer in one for now
-export const REPOSITORY_SELECT = 'REPOSITORY_SELECT';
+export const REPOSITORY_TOGGLE_SELECT = 'REPOSITORY_TOGGLE_SELECT';
 
-export function selectRepository(id) {
+export function toggleRepositorySelection(id) {
   return {
-    type: REPOSITORY_SELECT,
+    type: REPOSITORY_TOGGLE_SELECT,
     payload: id
   };
 }
 
 export const REPOSITORY_BUILD = 'REPOSITORY_BUILD';
+export const REPOSITORY_SUCCESS = 'REPOSITORY_SUCCESS';
+export const REPOSITORY_FAILURE = 'REPOSITORY_FAILURE';
 
 // XXX we need to pass more than a list of ids, so the getSelectedRepositories
 // selector could return a cut down array of objects with url, owner and name
 export function buildRepositories(repositories) {
   return (dispatch) => {
     const promises = repositories.map(
-      (repository) => dispatch(buildRepository(repository.url, repository.owner, repository.name))
+      (repository) => {
+
+        dispatch(buildRepository(repository));
+      }
     );
     return Promise.all(promises);
   };
 }
 
-export function buildRepository(url, owner, name) {
+export function buildRepository(repository) {
+  const { id, url, owner, name } = repository;
+
   return async (dispatch) => {
     if (url) {
 
       dispatch({
         type: REPOSITORY_BUILD,
-        payload: { id: name }
+        payload: id
       });
 
       try {
@@ -127,8 +134,20 @@ export async function createWebhook(owner, name) {
   }
 }
 
-function buildRepositorySuccess() {
+function buildRepositorySuccess(id) {
+  return {
+    type: REPOSITORY_SUCCESS,
+    payload: { id }
+  };
 }
 
-function buildRepositoryError() {
+function buildRepositoryError(id, error) {
+  return {
+    type: REPOSITORY_FAILURE,
+    payload: {
+      id,
+      error
+    },
+    error: true
+  };
 }

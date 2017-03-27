@@ -68,9 +68,11 @@ export const getRepositoriesToBuild = createSelector(
   [getSelectedRepositories, getRepositories, getRepositoryOwners],
   (index, repositories, owners) => {
     return index.map((id) => {
+      // XXX structuredSelector here?
       let repository = repositories[id];
       return {
-        name: repository.name,
+        id,
+        name,
         owner: owners[repository.owner].login,
         url: repository.html_url
       };

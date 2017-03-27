@@ -3,13 +3,13 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
 import { conf } from '../../helpers/config';
-import { createSnaps, createSnapsClear } from '../../actions/create-snap';
+import { buildRepositories } from '../../actions/repositories';
 import SelectRepositoryRow from '../select-repository-row';
 import Spinner from '../spinner';
 import PageLinks from '../page-links';
 import Button, { LinkButton } from '../vanilla/button';
 import { HeadingThree } from '../vanilla/heading';
-import { selectRepository, fetchUserRepositories } from '../../actions/repositories';
+import { toggleRepositorySelection, fetchUserRepositories } from '../../actions/repositories';
 import { getSelectedRepositories, getRepositoriesToBuild } from '../../selectors/index.js';
 import styles from './styles.css';
 
@@ -21,12 +21,16 @@ const SNAP_NAME_NOT_REGISTERED_ERROR_CODE = 'snap-name-not-registered';
 export class SelectRepositoryListComponent extends Component {
 
   componentDidMount() {
-    this.props.dispatch(createSnapsClear());
-    // TODO
-    //this.props.dispatch(unselectAllRepositories());
+    // TODO clear any repository-build state?
+    this.deselectAllRepositories(this.props.selectedRepositories);
+  }
+
+  deselectAllRepositories(selectedRepositories) {
+    selectedRepositories.map(id => toggleRepositorySelection(id));
   }
 
   componentWillReceiveProps(nextProps) {
+    // XXX move to selector
     const repositoriesStatus = nextProps.repositoriesStatus;
     const ids = Object.keys(repositoriesStatus);
     if (ids.length && ids.every((id) => repositoriesStatus[id].success)) {
@@ -34,6 +38,8 @@ export class SelectRepositoryListComponent extends Component {
     }
   }
 
+  // XXX this can be moved too select-repository-row as the error prop is on
+  // the repository object passed to it
   getSnapNotRegisteredMessage(snapName) {
     const devportalUrl = conf.get('STORE_DEVPORTAL_URL');
     const registerNameUrl = `${devportalUrl}/click-apps/register-name/` +
@@ -47,6 +53,8 @@ export class SelectRepositoryListComponent extends Component {
     </span>;
   }
 
+  // XXX this can be moved too select-repository-row as the error prop is on
+  // the repository object passed to it
   getErrorMessage(error) {
     if (error) {
       const payload = error.json.payload;
@@ -70,14 +78,14 @@ export class SelectRepositoryListComponent extends Component {
         key={ `repo_${full_name}` }
         repository={ repository }
         onChange={ this.onSelectRepository.bind(this, id) }
-        errorMsg= { this.getErrorMessage(status.error) }
+        errorMsg= { this.getErrorMessage(repository.__error) }
         isEnabled={ enabled }
       />
     );
   }
 
   onSelectRepository(id) {
-    this.props.dispatch(selectRepository(id));
+    this.props.dispatch(toggleRepositorySelection(id));
   }
 
   // XXX it's not a submit, there's no form, rename to ~handleAddButtonClick
@@ -86,7 +94,7 @@ export class SelectRepositoryListComponent extends Component {
 
     // TODO else "You have not selected any repositories"
     if (repositoriesToBuild.length) {
-      this.props.dispatch(createSnaps(repositoriesToBuild));
+      this.props.dispatch(buildRepositories(repositoriesToBuild));
     }
   }
 
