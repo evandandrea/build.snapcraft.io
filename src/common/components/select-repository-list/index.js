@@ -4,16 +4,13 @@ import { withRouter } from 'react-router';
 
 import { conf } from '../../helpers/config';
 import { createSnaps, createSnapsClear } from '../../actions/create-snap';
-import {
-  unselectAllRepositories
-} from '../../actions/select-repositories-form';
 import SelectRepositoryRow from '../select-repository-row';
 import Spinner from '../spinner';
 import PageLinks from '../page-links';
 import Button, { LinkButton } from '../vanilla/button';
 import { HeadingThree } from '../vanilla/heading';
 import { selectRepository, fetchUserRepositories } from '../../actions/repositories';
-import { getSelectedRepositories } from '../../selectors/index.js';
+import { getSelectedRepositories, getRepositoriesToBuild } from '../../selectors/index.js';
 import styles from './styles.css';
 
 // loading container styles not to duplicate .spinner class
@@ -25,7 +22,8 @@ export class SelectRepositoryListComponent extends Component {
 
   componentDidMount() {
     this.props.dispatch(createSnapsClear());
-    this.props.dispatch(unselectAllRepositories());
+    // TODO
+    //this.props.dispatch(unselectAllRepositories());
   }
 
   componentWillReceiveProps(nextProps) {
@@ -64,8 +62,6 @@ export class SelectRepositoryListComponent extends Component {
     const repository = this.props.entities.repos[id];
     const { full_name, enabled } = repository;
 
-    //const isSelected = this.props.repositories.selected.indexOf(id) !== -1;
-
     //const status = this.props.repositoriesStatus[fullName] || {};
     //const { selectedRepos } = this.props.selectRepositoriesForm;
 
@@ -84,10 +80,13 @@ export class SelectRepositoryListComponent extends Component {
     this.props.dispatch(selectRepository(id));
   }
 
+  // XXX it's not a submit, there's no form, rename to ~handleAddButtonClick
   onSubmit() {
-    const { selectedRepos } = this.props.selectRepositoriesForm;
-    if (selectedRepos.length) {
-      this.props.dispatch(createSnaps(selectedRepos));
+    const { repositoriesToBuild } = this.props;
+
+    // TODO else "You have not selected any repositories"
+    if (repositoriesToBuild.length) {
+      this.props.dispatch(createSnaps(repositoriesToBuild));
     }
   }
 
@@ -203,7 +202,8 @@ SelectRepositoryListComponent.propTypes = {
   repositoriesStatus: PropTypes.object,
   router: PropTypes.object.isRequired,
   snaps: PropTypes.object,
-  selectedRepositories: PropTypes.array
+  selectedRepositories: PropTypes.array,
+  repositoriesToBuild: PropTypes.array
 };
 
 function mapStateToProps(state) {
@@ -219,7 +219,8 @@ function mapStateToProps(state) {
     entities,
     repositories, // ?repository-pagination
     repositoriesStatus,
-    selectedRepositories: getSelectedRepositories(state)
+    selectedRepositories: getSelectedRepositories(state),
+    repositoriesToBuild: getRepositoriesToBuild(state)
   };
 }
 

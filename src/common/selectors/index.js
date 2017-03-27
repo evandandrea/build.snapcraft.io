@@ -3,7 +3,8 @@ import { createSelector } from 'reselect';
 import { parseGitHubRepoUrl } from '../helpers/github-url';
 
 const getRepositoriesIndex = state => state.repositories.ids;
-const getRepositoriesEntities = state => state.entities.repos;
+const getRepositories = state => state.entities.repos;
+const getRepositoryOwners = state => state.entities.owners;
 const getSnaps = state => state.snaps;
 const getSnapBuilds = state => state.snapBuilds;
 
@@ -48,13 +49,31 @@ export const hasNoConfiguredSnaps = createSelector(
 );
 
 /**
+ * TODO merge with repositoriesToBuild?
  * @returns {Array} get selected repositories
  */
 export const getSelectedRepositories = createSelector(
-  [getRepositoriesIndex, getRepositoriesEntities],
+  [getRepositoriesIndex, getRepositories],
   (repos, entities) => {
     return repos.filter((id) => {
       return entities[id].__isSelected;
+    });
+  }
+);
+
+/**
+ * @returns {Array} get repositories selected to build
+ */
+export const getRepositoriesToBuild = createSelector(
+  [getSelectedRepositories, getRepositories, getRepositoryOwners],
+  (index, repositories, owners) => {
+    return index.map((id) => {
+      let repository = repositories[id];
+      return {
+        name: repository.name,
+        owner: owners[repository.owner].login,
+        url: repository.html_url
+      };
     });
   }
 );
