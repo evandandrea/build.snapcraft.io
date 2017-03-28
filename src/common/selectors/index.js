@@ -1,4 +1,5 @@
 import { createSelector } from 'reselect';
+import pick from 'lodash/pick';
 
 import { parseGitHubRepoUrl } from '../helpers/github-url';
 
@@ -6,6 +7,8 @@ const getRepositoriesIndex = state => state.repositories.ids;
 const getRepositories = state => state.entities.repos;
 const getRepositoryOwners = state => state.entities.owners;
 const getSnaps = state => state.snaps;
+const _getSnapsIndex = state => state.snaps.ids;
+const _getSnaps = state => state.entities.snaps;
 const getSnapBuilds = state => state.snapBuilds;
 
 /**
@@ -72,11 +75,26 @@ export const getRepositoriesToBuild = createSelector(
       let repository = repositories[id];
       return {
         id,
-        name,
+        name: repository.name,
         owner: owners[repository.owner].login,
         url: repository.html_url
       };
     });
+  }
+);
+
+/**
+ * @returns {Array} get repositories already enabled as builds
+ * @todo consider case for multiple snapcraft.yaml's per git_repository_url
+ */
+export const getEnabledRepositories = createSelector(
+  [getRepositories, getRepositoriesIndex, _getSnaps, _getSnapsIndex],
+  (repositories, repositoriesIndex, snaps, snapIndex) => {
+    return pick(repositories, repositoriesIndex.filter((repositoryId) => {
+      return snapIndex.some((snapId) => {
+        return snaps[snapId].git_repository_url === repositories[repositoryId].html_url;
+      });
+    }));
   }
 );
 

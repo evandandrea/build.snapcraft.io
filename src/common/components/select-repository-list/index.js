@@ -10,7 +10,7 @@ import PageLinks from '../page-links';
 import Button, { LinkButton } from '../vanilla/button';
 import { HeadingThree } from '../vanilla/heading';
 import { toggleRepositorySelection, fetchUserRepositories } from '../../actions/repositories';
-import { getSelectedRepositories, getRepositoriesToBuild } from '../../selectors/index.js';
+import { getSelectedRepositories, getRepositoriesToBuild, getEnabledRepositories } from '../../selectors/index.js';
 import styles from './styles.css';
 
 // loading container styles not to duplicate .spinner class
@@ -30,6 +30,7 @@ export class SelectRepositoryListComponent extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    // XXX DONT FORGET ME!!!
     // XXX move to selector
     const repositoriesStatus = nextProps.repositoriesStatus;
     const ids = Object.keys(repositoriesStatus);
@@ -68,10 +69,9 @@ export class SelectRepositoryListComponent extends Component {
 
   renderRepository(id) {
     const repository = this.props.entities.repos[id];
-    const { full_name, enabled } = repository;
+    const { full_name } = repository;
 
-    //const status = this.props.repositoriesStatus[fullName] || {};
-    //const { selectedRepos } = this.props.selectRepositoriesForm;
+    const isEnabled = !!this.props.enabledRepositories[id];
 
     return (
       <SelectRepositoryRow
@@ -79,7 +79,7 @@ export class SelectRepositoryListComponent extends Component {
         repository={ repository }
         onChange={ this.onSelectRepository.bind(this, id) }
         errorMsg= { this.getErrorMessage(repository.__error) }
-        isEnabled={ enabled }
+        isEnabled={ isEnabled }
       />
     );
   }
@@ -92,6 +92,8 @@ export class SelectRepositoryListComponent extends Component {
   onSubmit() {
     const { repositoriesToBuild } = this.props;
 
+    console.log(repositoriesToBuild);
+
     // TODO else "You have not selected any repositories"
     if (repositoriesToBuild.length) {
       this.props.dispatch(buildRepositories(repositoriesToBuild));
@@ -100,29 +102,6 @@ export class SelectRepositoryListComponent extends Component {
 
   onPageLinkClick(pageNumber) {
     this.props.dispatch(fetchUserRepositories(pageNumber));
-  }
-
-  // TODO make selector getEnabledRepositories
-  filterEnabledRepos(repositories) {
-    // XXX why check success?
-    const { success, snaps } = this.props.snaps;
-
-    if (success && snaps.length) {
-      for (let i = repositories.length; i--;) {
-        for (let j = snaps.length; j--;) {
-          const enabledRepo = snaps[j].git_repository_url;
-
-          if (enabledRepo === repositories[i].url) {
-            repositories[i].enabled = true;
-            break;
-          } else {
-            repositories[i].enabled = false;
-          }
-        }
-      }
-    }
-
-    return repositories;
   }
 
   pageSlice(array, pageLinks) {
@@ -146,9 +125,7 @@ export class SelectRepositoryListComponent extends Component {
     const { ids, error, isFetching, pageLinks } = this.props.repositories;
     const pagination = this.renderPageLinks(pageLinks);
 
-    //this.filterEnabledRepos(repos);
     let renderedRepos = null;
-
 
     // XXX if not success, then what? we lose the previously good list of repos?
     if (!error) {
@@ -211,7 +188,8 @@ SelectRepositoryListComponent.propTypes = {
   router: PropTypes.object.isRequired,
   snaps: PropTypes.object,
   selectedRepositories: PropTypes.array,
-  repositoriesToBuild: PropTypes.array
+  repositoriesToBuild: PropTypes.array,
+  enabledRepositories: PropTypes.object
 };
 
 function mapStateToProps(state) {
@@ -228,7 +206,8 @@ function mapStateToProps(state) {
     repositories, // ?repository-pagination
     repositoriesStatus,
     selectedRepositories: getSelectedRepositories(state),
-    repositoriesToBuild: getRepositoriesToBuild(state)
+    repositoriesToBuild: getRepositoriesToBuild(state),
+    enabledRepositories: getEnabledRepositories(state)
   };
 }
 

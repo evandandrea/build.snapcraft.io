@@ -31,7 +31,7 @@ export function fetchUserSnaps(owner) {
       if (result.status !== 'success') {
         throw getError(response, result);
       }
-      dispatch(fetchSnapsSuccess(result.payload.snaps));
+      dispatch(fetchSnapsSuccess(result));
     } catch (error) {
       dispatch(fetchSnapsError(error));
     }

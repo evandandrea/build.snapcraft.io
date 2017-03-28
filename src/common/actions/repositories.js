@@ -17,7 +17,6 @@ export function setRepositories(repos) {
   };
 }
 
-// XXX rename to fetchGithubRepositories?
 export function fetchUserRepositories(pageNumber) {
   return async (dispatch) => {
     let urlParts = [BASE_URL, 'api/github/repos'];
@@ -80,7 +79,6 @@ export function buildRepositories(repositories) {
   return (dispatch) => {
     const promises = repositories.map(
       (repository) => {
-
         dispatch(buildRepository(repository));
       }
     );

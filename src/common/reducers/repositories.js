@@ -7,10 +7,12 @@ import * as ActionTypes from '../actions/repositories';
 // XXX should we be handling snaps here too?
 // no, because it's not part of the normalized result from github
 // so this should really be called github_entities
-export function entities(state = { repos: {} }, action) {
+// no, decompose instead ...
+export function entities(state = { snaps: {}, repos: {} }, action) {
   if (action.payload && action.payload.entities) {
     return merge({}, state, action.payload.entities);
   }
+
 
   const reposInitialState = {
     __isFetching: false,

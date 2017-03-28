@@ -2,7 +2,7 @@ import qs from 'qs';
 import url from 'url';
 import { normalize } from 'normalizr';
 
-import * as schema from './schema';
+import { repoList } from './schema';
 import logging from '../logging';
 import requestGitHub from '../helpers/github';
 import { conf } from '../helpers/config';
@@ -154,7 +154,7 @@ export const listRepositories = async (req, res) => {
     status: 'success',
     code: 'github-list-repositories',
     // XXX drop response specific prop, make response a little more general purpose
-    ...normalize(response.body, schema.repoList)
+    ...normalize(response.body, repoList)
   };
 
   if (response.headers.link) {
@@ -166,8 +166,8 @@ export const listRepositories = async (req, res) => {
 
 export const createWebhook = async (req, res) => {
   const { owner, name } = req.body;
-
   let secret;
+
   try {
     secret = makeWebhookSecret(owner, name);
   } catch (e) {

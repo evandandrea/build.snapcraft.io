@@ -15,6 +15,7 @@ class SelectRepositoriesPage extends Component {
     const owner = this.props.user.login;
 
     if (authenticated) {
+      // TODO Promise.all()
       this.props.dispatch(fetchUserRepositories());
       this.props.dispatch(fetchUserSnaps(owner));
     }
