@@ -72,13 +72,27 @@ export const getRepositoriesToBuild = createSelector(
   (index, repositories, owners) => {
     return index.map((id) => {
       // XXX structuredSelector here?
-      let repository = repositories[id];
+      const repository = repositories[id];
       return {
         id,
         name: repository.name,
         owner: owners[repository.owner].login,
         url: repository.html_url
       };
+    });
+  }
+);
+
+/**
+ * @returns {Boolean} true if there github repositories in a failed state after
+ * submitting for build to launchpad
+ */
+export const hasFailedRepositories = createSelector(
+  [getSelectedRepositories, getRepositories],
+  (index, repositories) => {
+    return index.some((id) => {
+      const repository = repositories[id];
+      return repository.__error;
     });
   }
 );

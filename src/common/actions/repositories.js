@@ -1,4 +1,5 @@
 import 'isomorphic-fetch';
+import { push } from 'react-router-redux';
 
 import { checkStatus, getError } from '../helpers/api';
 import { conf } from '../helpers/config';
@@ -65,24 +66,25 @@ export const REPOSITORY_TOGGLE_SELECT = 'REPOSITORY_TOGGLE_SELECT';
 export function toggleRepositorySelection(id) {
   return {
     type: REPOSITORY_TOGGLE_SELECT,
-    payload: id
+    payload: {
+      id
+    }
   };
 }
 
 export const REPOSITORY_BUILD = 'REPOSITORY_BUILD';
 export const REPOSITORY_SUCCESS = 'REPOSITORY_SUCCESS';
 export const REPOSITORY_FAILURE = 'REPOSITORY_FAILURE';
+export const REPOSITORY_RESET = 'REPOSITORY_RESET';
 
-// XXX we need to pass more than a list of ids, so the getSelectedRepositories
-// selector could return a cut down array of objects with url, owner and name
 export function buildRepositories(repositories) {
   return (dispatch) => {
     const promises = repositories.map(
       (repository) => {
-        dispatch(buildRepository(repository));
+        return dispatch(buildRepository(repository));
       }
     );
-    return Promise.all(promises);
+    return Promise.all(promises).then(() => dispatch(push('/dashboard')));
   };
 }
 
@@ -90,26 +92,36 @@ export function buildRepository(repository) {
   const { id, url, owner, name } = repository;
 
   return async (dispatch) => {
-    if (url) {
+    dispatch({
+      type: REPOSITORY_BUILD,
+      payload: {
+        id
+      }
+    });
 
-      dispatch({
-        type: REPOSITORY_BUILD,
-        payload: id
+    try {
+      await createWebhook(owner, name);
+      const response = await fetch(`${BASE_URL}/api/launchpad/snaps`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ repository_url: url }),
+        credentials: 'same-origin'
       });
 
-      try {
-        await createWebhook(owner, name);
-        const response = await fetch(`${BASE_URL}/api/launchpad/snaps`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ repository_url: url }),
-          credentials: 'same-origin'
-        });
-        await checkStatus(response);
-        dispatch(buildRepositorySuccess(name));
-      } catch (error) {
-        dispatch(buildRepositoryError(name, error));
-      }
+      await checkStatus(response);
+      dispatch(buildRepositorySuccess(id));
+    } catch (error) {
+      dispatch(buildRepositoryError(id, error));
+      return Promise.reject(error);
+    }
+  };
+}
+
+export function resetRepository(id) {
+  return {
+    type: REPOSITORY_RESET,
+    payload: {
+      id
     }
   };
 }
@@ -135,7 +147,9 @@ export async function createWebhook(owner, name) {
 function buildRepositorySuccess(id) {
   return {
     type: REPOSITORY_SUCCESS,
-    payload: { id }
+    payload: {
+      id
+    }
   };
 }
 

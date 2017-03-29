@@ -9,8 +9,17 @@ import Spinner from '../spinner';
 import PageLinks from '../page-links';
 import Button, { LinkButton } from '../vanilla/button';
 import { HeadingThree } from '../vanilla/heading';
-import { toggleRepositorySelection, fetchUserRepositories } from '../../actions/repositories';
-import { getSelectedRepositories, getRepositoriesToBuild, getEnabledRepositories } from '../../selectors/index.js';
+import {
+  fetchUserRepositories,
+  resetRepository,
+  toggleRepositorySelection,
+} from '../../actions/repositories';
+import {
+  getEnabledRepositories,
+  getSelectedRepositories,
+  getRepositoriesToBuild,
+  hasFailedRepositories
+} from '../../selectors/index.js';
 import styles from './styles.css';
 
 // loading container styles not to duplicate .spinner class
@@ -21,25 +30,12 @@ const SNAP_NAME_NOT_REGISTERED_ERROR_CODE = 'snap-name-not-registered';
 export class SelectRepositoryListComponent extends Component {
 
   componentDidMount() {
-    // TODO clear any repository-build state?
-    this.deselectAllRepositories(this.props.selectedRepositories);
+    this.props.selectedRepositories.map(id => {
+      this.props.dispatch(resetRepository(id));
+    });
   }
 
-  deselectAllRepositories(selectedRepositories) {
-    selectedRepositories.map(id => toggleRepositorySelection(id));
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // XXX DONT FORGET ME!!!
-    // XXX move to selector
-    const repositoriesStatus = nextProps.repositoriesStatus;
-    const ids = Object.keys(repositoriesStatus);
-    if (ids.length && ids.every((id) => repositoriesStatus[id].success)) {
-      this.props.router.push('/dashboard');
-    }
-  }
-
-  // XXX this can be moved too select-repository-row as the error prop is on
+  // TODO this can be moved too select-repository-row as the error prop is on
   // the repository object passed to it
   getSnapNotRegisteredMessage(snapName) {
     const devportalUrl = conf.get('STORE_DEVPORTAL_URL');
@@ -54,15 +50,17 @@ export class SelectRepositoryListComponent extends Component {
     </span>;
   }
 
-  // XXX this can be moved too select-repository-row as the error prop is on
+  // TODO this can be moved too select-repository-row as the error prop is on
   // the repository object passed to it
   getErrorMessage(error) {
-    if (error) {
-      const payload = error.json.payload;
+
+    const { payload = undefined } = error;
+
+    if (payload) {
       if (payload.code === SNAP_NAME_NOT_REGISTERED_ERROR_CODE) {
         return this.getSnapNotRegisteredMessage(payload.snap_name);
       } else {
-        return error.message;
+        return payload.message;
       }
     }
   }
@@ -78,7 +76,7 @@ export class SelectRepositoryListComponent extends Component {
         key={ `repo_${full_name}` }
         repository={ repository }
         onChange={ this.onSelectRepository.bind(this, id) }
-        errorMsg= { this.getErrorMessage(repository.__error) }
+        errorMsg={ repository.__error && this.getErrorMessage(repository.__error) }
         isEnabled={ isEnabled }
       />
     );
@@ -91,8 +89,6 @@ export class SelectRepositoryListComponent extends Component {
   // XXX it's not a submit, there's no form, rename to ~handleAddButtonClick
   onSubmit() {
     const { repositoriesToBuild } = this.props;
-
-    console.log(repositoriesToBuild);
 
     // TODO else "You have not selected any repositories"
     if (repositoriesToBuild.length) {
@@ -189,7 +185,8 @@ SelectRepositoryListComponent.propTypes = {
   snaps: PropTypes.object,
   selectedRepositories: PropTypes.array,
   repositoriesToBuild: PropTypes.array,
-  enabledRepositories: PropTypes.object
+  enabledRepositories: PropTypes.object,
+  hasFailedRepositories: PropTypes.bool
 };
 
 function mapStateToProps(state) {
@@ -207,7 +204,8 @@ function mapStateToProps(state) {
     repositoriesStatus,
     selectedRepositories: getSelectedRepositories(state),
     repositoriesToBuild: getRepositoriesToBuild(state),
-    enabledRepositories: getEnabledRepositories(state)
+    enabledRepositories: getEnabledRepositories(state),
+    hasFailedRepositories: hasFailedRepositories(state)
   };
 }
 

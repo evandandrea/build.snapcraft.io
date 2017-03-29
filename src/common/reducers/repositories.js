@@ -15,20 +15,21 @@ export function entities(state = { snaps: {}, repos: {} }, action) {
 
 
   const reposInitialState = {
+    __isSelected: false,
     __isFetching: false,
     __error: null
   };
 
   switch(action.type) {
     case ActionTypes.REPOSITORY_TOGGLE_SELECT: {
-      const wasSelected = state.repos[action.payload].__isSelected;
+      const wasSelected = state.repos[action.payload.id].__isSelected;
 
       return {
         ...state,
         repos: {
           ...state.repos,
-          [action.payload]: {
-            ...state.repos[action.payload] || {},
+          [action.payload.id]: {
+            ...state.repos[action.payload.id] || {},
             ...reposInitialState, // clear state from building by deselecting
             __isSelected: !wasSelected
           }
@@ -40,35 +41,37 @@ export function entities(state = { snaps: {}, repos: {} }, action) {
         ...state,
         repos: {
           ...state.repos,
-          [action.payload]: {
-            ...state.repos[action.payload] || {},
+          [action.payload.id]: {
+            ...state.repos[action.payload.id] || {},
             ...reposInitialState,
             __isFetching: true,
+            __isSelected: true
           }
         }
       };
     }
-    case ActionTypes.REPOSITORY_SUCCESS: {
+    case ActionTypes.REPOSITORY_SUCCESS:
+    case ActionTypes.REPOSITORY_RESET: {
       return {
         ...state,
         repos: {
           ...state.repos,
-          [action.payload]: {
-            ...state.repos[action.payload] || {},
+          [action.payload.id]: {
+            ...state.repos[action.payload.id] || {},
             ...reposInitialState
           }
         }
       };
     }
-    case ActionTypes.REPOSITORY_ERROR: {
+    case ActionTypes.REPOSITORY_FAILURE: {
       return {
         ...state,
         repos: {
           ...state.repos,
-          [action.payload]: {
-            ...state.repos[action.payload] || {},
+          [action.payload.id]: {
+            ...state.repos[action.payload.id] || {},
             ...reposInitialState,
-            __error: action.payload.error
+            __error: action.payload.error.json
           }
         }
       };
