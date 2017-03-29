@@ -3,6 +3,7 @@ import { push } from 'react-router-redux';
 
 import { checkStatus, getError } from '../helpers/api';
 import { conf } from '../helpers/config';
+import { fetchUserSnaps } from './snaps.js';
 
 const BASE_URL = conf.get('BASE_URL');
 
@@ -56,6 +57,17 @@ export function fetchRepositoriesError(error) {
     type: REPOSITORIES_FAILURE,
     payload: error,
     error: true
+  };
+}
+
+// XXX may need to split out the fetch from the success and failure dispatch
+// to ensure than setRepositories happens in sync with refreshed user snaps
+export function fetchUserRepositoriesAndSnaps(owner) {
+  return (dispatch) => {
+    return Promise.all([
+      dispatch(fetchUserRepositories()),
+      dispatch(fetchUserSnaps(owner))
+    ]);
   };
 }
 

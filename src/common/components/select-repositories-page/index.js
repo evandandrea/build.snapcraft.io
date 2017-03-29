@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 
 import { fetchUserSnaps } from '../../actions/snaps';
 import { fetchBuilds } from '../../actions/snap-builds';
-import { fetchUserRepositories } from '../../actions/repositories';
+import { fetchUserRepositoriesAndSnaps } from '../../actions/repositories';
 import SelectRepositoryList from '../select-repository-list';
 import { HeadingThree } from '../vanilla/heading';
 import FirstTimeHeading from '../first-time-heading';
@@ -15,22 +15,10 @@ class SelectRepositoriesPage extends Component {
     const owner = this.props.user.login;
 
     if (authenticated) {
-      // TODO Promise.all()
-      this.props.dispatch(fetchUserRepositories());
-      this.props.dispatch(fetchUserSnaps(owner));
+      this.props.dispatch(fetchUserRepositoriesAndSnaps(owner));
     }
 
     this.fetchData(this.props);
-  }
-
-  fetchData(props) {
-    const { snaps } = props;
-
-    if (snaps.success) {
-      snaps.snaps.forEach((snap) => {
-        this.props.dispatch(fetchBuilds(snap.git_repository_url, snap.self_link));
-      });
-    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -53,6 +41,16 @@ class SelectRepositoriesPage extends Component {
         </CardHighlighted>
       </div>
     );
+  }
+
+  fetchData(props) {
+    const { snaps } = props;
+
+    if (snaps.success) {
+      snaps.snaps.forEach((snap) => {
+        this.props.dispatch(fetchBuilds(snap.git_repository_url, snap.self_link));
+      });
+    }
   }
 }
 
