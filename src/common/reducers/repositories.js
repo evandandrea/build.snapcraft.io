@@ -83,8 +83,7 @@ export function entities(state = { snaps: {}, repos: {} }, action) {
 
 export function repositories(state = {
   isFetching: false,
-  //success: false, // implicit in !!error
-  error: false,
+  error: null,
   ids: [],
   pageLinks: {}
 }, action) {
@@ -99,7 +98,7 @@ export function repositories(state = {
       return {
         ...state,
         isFetching: false,
-        error: false,
+        error: null,
         ids: union(state.ids, action.payload.result),
         pageLinks: action.payload.pageLinks
       };
