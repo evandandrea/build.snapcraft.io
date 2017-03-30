@@ -12,7 +12,7 @@ export function getError(response, json) {
 
 export function checkStatus(response) {
   if (response.status >= 200 && response.status < 300) {
-    return false;
+    return response;
   } else {
     return response.json().then((json) => {
       throw getError(response, json);
