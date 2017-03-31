@@ -39,13 +39,13 @@ describe('<SelectRepositoryListComponent /> instance', function() {
       instance = shallow(<SelectRepositoryListComponent { ...props } />).instance();
     });
 
-    it('should flag matching repos as enabled', function() {
+    xit('should flag matching repos as enabled', function() {
       expect(instance.filterEnabledRepos(props.repositories.repos)[0].enabled).toBe(true);
     });
-    it('should flag non matching repos as not enabled', function() {
+    xit('should flag non matching repos as not enabled', function() {
       expect(instance.filterEnabledRepos(props.repositories.repos)[1].enabled).toBe(false);
     });
-    it('should reset the enabled flags if we change the snaps list', function() {
+    xit('should reset the enabled flags if we change the snaps list', function() {
       props.snaps.snaps[0].git_repository_url = 'bar/baz';
       expect(instance.filterEnabledRepos(props.repositories.repos)[0].enabled).toBe(false);
     });

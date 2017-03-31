@@ -40,7 +40,7 @@ describe('repositories actions', () => {
 
     it('should create an action to store snap builds', () => {
       const expectedAction = {
-        type: ActionTypes.SET_REPOSITORIES,
+        type: ActionTypes.REPOSITORIES_SUCCESS,
         payload
       };
 
@@ -62,7 +62,7 @@ describe('repositories actions', () => {
 
     it('should create an action to store request error on failure', () => {
       const expectedAction = {
-        type: ActionTypes.FETCH_REPOSITORIES_ERROR,
+        type: ActionTypes.REPOSITORIES_FAILURE,
         error: true,
         payload
       };
@@ -110,7 +110,7 @@ describe('repositories actions', () => {
           .then(() => {
             api.done();
             expect(store.getActions()).toHaveActionOfType(
-              ActionTypes.SET_REPOSITORIES
+              ActionTypes.REPOSITORIES_REQUEST
             );
           });
       });
@@ -154,7 +154,7 @@ describe('repositories actions', () => {
       return store.dispatch(fetchUserRepositories())
         .then(() => {
           expect(store.getActions()).toHaveActionOfType(
-            ActionTypes.FETCH_REPOSITORIES_ERROR
+            ActionTypes.REPOSITORIES_FAILURE
           );
         });
     });
