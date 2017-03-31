@@ -50,7 +50,7 @@ export function snaps(state = {
         isFetching: false,
         success: true,
         snaps: [
-          ...action.payload.payload.snaps
+          ...action.payload
         ],
         ids: union(state.ids, action.payload.result),
         error: null
