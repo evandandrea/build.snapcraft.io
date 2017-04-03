@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 
 import { conf } from '../../helpers/config';
-import { buildRepositories } from '../../actions/repositories';
+import { buildRepositories } from '../../actions/repository';
 import SelectRepositoryRow from '../select-repository-row';
 import Spinner from '../spinner';
 import PageLinks from '../page-links';
@@ -11,9 +11,11 @@ import Button, { LinkButton } from '../vanilla/button';
 import { HeadingThree } from '../vanilla/heading';
 import {
   fetchUserRepositories,
+} from '../../actions/repositories';
+import {
   resetRepository,
   toggleRepositorySelection,
-} from '../../actions/repositories';
+} from '../../actions/repository';
 import {
   getEnabledRepositories,
   getSelectedRepositories,

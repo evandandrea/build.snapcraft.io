@@ -10,17 +10,19 @@ import * as user from './user';
 import * as auth from './auth';
 import * as authStore from './auth-store';
 import * as registerName from './register-name';
+import { entities } from './entities';
 
 const rootReducer = combineReducers({
-  ...repository,
-  ...repositories,
+  ...auth,
   ...authError,
+  ...authStore,
+  ...registerName,
+  ...repositories,
+  ...repository,
   ...snapBuilds,
   ...snaps,
   ...user,
-  ...auth,
-  ...authStore,
-  ...registerName,
+  entities,
   routing: routerReducer
 });
 

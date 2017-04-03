@@ -1,6 +1,6 @@
 import merge from 'lodash/merge';
 
-import * as ActionTypes from '../actions/repositories';
+import * as ActionTypes from '../actions/repository';
 
 // export only for testing
 export function repository(state={
@@ -52,11 +52,15 @@ export function entities(state = { snaps: {}, repos: {} }, action) {
     return merge({}, state, action.payload.entities);
   }
 
-  return {
-    ...state,
-    repos: {
-      ...state.repos,
-      [action.payload.id]: repository(state.repos[action.payload.id], action)
-    }
-  };
+  if (ActionTypes[action.type]) {
+    return {
+      ...state,
+      repos: {
+        ...state.repos,
+        [action.payload.id]: repository(state.repos[action.payload.id], action)
+      }
+    };
+  }
+
+  return state;
 }
