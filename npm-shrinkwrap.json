@@ -769,7 +769,13 @@
     "lodash.keys": {
       "version": "3.1.2"
     },
+    "lodash.merge": {
+      "version": "4.6.0"
+    },
     "lodash.reduce": {
+      "version": "4.6.0"
+    },
+    "lodash.union": {
       "version": "4.6.0"
     },
     "loose-envify": {

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { json } from 'body-parser';
 
+import { verifyToken } from '../middleware/csrf-token';
 import {
   authorizeSnap,
   deleteSnap,
@@ -31,6 +32,7 @@ router.post('/launchpad/snaps/request-builds', requestSnapBuilds);
 
 // XXX cjwatson 2017-02-28: This would be more RESTful if we defined an API
 // URL for each snap and then just made this a DELETE.
+router.use('/launchpad/snaps/delete', verifyToken);
 router.use('/launchpad/snaps/delete', json());
 router.post('/launchpad/snaps/delete', deleteSnap);
 

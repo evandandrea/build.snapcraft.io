@@ -74,6 +74,9 @@ export function snaps(state = {
         isFetching: true
       };
     case ActionTypes.REMOVE_SNAP_SUCCESS:
+      const newIds = state.ids.filter((id) => {
+        return id !== action.payload.repository_url;
+      });
       return {
         ...state,
         isFetching: false,
@@ -84,6 +87,7 @@ export function snaps(state = {
             return snap.git_repository_url !== action.payload.repository_url;
           }) : null
         ),
+        ids: newIds,
         error: null
       };
     case ActionTypes.REMOVE_SNAP_ERROR:

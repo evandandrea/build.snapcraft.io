@@ -2,6 +2,7 @@ import 'isomorphic-fetch';
 
 import { checkStatus, getError } from '../helpers/api';
 import { conf } from '../helpers/config';
+import { CALL_API } from '../middleware/call-api';
 
 const BASE_URL = conf.get('BASE_URL');
 
@@ -60,45 +61,17 @@ export function fetchSnapsError(error) {
 }
 
 export function removeSnap(repositoryUrl) {
-  return async (dispatch) => {
-    dispatch({
-      type: REMOVE_SNAP,
-      payload: { repository_url: repositoryUrl }
-    });
-
-    try {
-      const response = await fetch(`${BASE_URL}/api/launchpad/snaps/delete`, {
+  return {
+    payload: { repository_url: repositoryUrl },
+    [ CALL_API ]: {
+      types: [ REMOVE_SNAP, REMOVE_SNAP_SUCCESS, REMOVE_SNAP_ERROR ],
+      path: '/api/launchpad/snaps/delete',
+      options: {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ repository_url: repositoryUrl }),
         credentials: 'same-origin'
-      });
-      await checkStatus(response);
-      const result = await response.json();
-      if (result.status !== 'success') {
-        throw getError(response, result);
       }
-      dispatch(removeSnapSuccess(repositoryUrl));
-    } catch (error) {
-      dispatch(removeSnapError(repositoryUrl, error));
     }
-  };
-}
-
-export function removeSnapSuccess(repositoryUrl) {
-  return {
-    type: REMOVE_SNAP_SUCCESS,
-    payload: { repository_url: repositoryUrl }
-  };
-}
-
-export function removeSnapError(repositoryUrl, error) {
-  return {
-    type: REMOVE_SNAP_ERROR,
-    payload: {
-      repository_url: repositoryUrl,
-      error
-    },
-    error: true
   };
 }
