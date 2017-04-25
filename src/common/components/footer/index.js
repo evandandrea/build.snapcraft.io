@@ -22,7 +22,7 @@ export default class Footer extends Component {
             </ul>
           </div>
           <p className={ styles.copyright }>© 2017 Canonical Ltd. Ubuntu and Canonical are registered trademarks of Canonical Ltd.</p>
-          <p><a href="https://www.ubuntu.com/legal">Legal information</a> · <a href="https://github.com/canonical-ols/build.snapcraft.io/issues/new">Report a bug on this site</a> · Help us improve Snapcraft, <a href="https://docs.google.com/forms/d/e/1FAIpQLSfCbGjGlCHCx3CdjH6Ls2nPd37nWFzlBoVXq1hAC9V9cYz2AA/viewform">participate in user testing</a></p>
+          <p><a href="https://www.ubuntu.com/legal">Legal information</a> · <a href="https://github.com/canonical-ols/build.snapcraft.io/issues/new">Report a bug on this site</a> · Help us improve Snapcraft by <a href="https://docs.google.com/forms/d/e/1FAIpQLSfCbGjGlCHCx3CdjH6Ls2nPd37nWFzlBoVXq1hAC9V9cYz2AA/viewform">participating in user testing</a></p>
         </div>
       </div>
     );
