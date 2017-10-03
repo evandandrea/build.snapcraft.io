@@ -9,22 +9,33 @@ const GAID = conf.get('GOOGLE_ANALYTICS_ID');
 const OPTID = conf.get('GOOGLE_OPTIMIZE_ID');
 const GTMID = conf.get('GOOGLE_TAG_MANAGER_ID');
 
-const googleAnalytics = GAID && OPTID ?
-  <style>.async-hide { opacity: 0 !important} </style>
-  <script>(function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
-  h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
-  (a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
-  })(window,document.documentElement,'async-hide','dataLayer',4000,
-  {'${OPTID}':true});</script>
-  
-  <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-  ga('create', '${GAID}', 'auto');
-  ga('require', '${OPTID}');
-  </script>
+const googleOptimizePageHideCss = GAID && OPTID ?
+  <style
+    dangerouslySetInnerHTML={{ __html: `.async-hide { opacity: 0 !important}` }}
+  />
+  : null;
 
+const googleOptimizePageHide = GAID && OPTID ?
+  <script
+    dangerouslySetInnerHTML={{ __html: `
+    (function(a,s,y,n,c,h,i,d,e){s.className+=' '+y;h.start=1*new Date;
+    h.end=i=function(){s.className=s.className.replace(RegExp(' ?'+y),'')};
+    (a[n]=a[n]||[]).hide=h;setTimeout(function(){i();h.end=null},c);h.timeout=c;
+    })(window,document.documentElement,'async-hide','dataLayer',4000,
+    {'${OPTID}':true});` }}
+  />
+ : null;
+
+const googleAnalytics = GAID && OPTID ?
+  <script
+    dangerouslySetInnerHTML={{ __html: `
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    ga('create', '${GAID}', 'auto');
+    ga('require', '${OPTID}');` }}
+  />
  : null;
 
 const googleTagManager = GTMID ?
@@ -63,6 +74,8 @@ export default class Html extends Component {
     return (
       <html {...attrs}>
         <head>
+          { googleOptimizePageHideCss }
+          { googleOptimizePageHide }
           { googleAnalytics }
           { googleTagManager }
           {head.title.toComponent()}
