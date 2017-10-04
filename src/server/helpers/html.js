@@ -11,7 +11,7 @@ const GTMID = conf.get('GOOGLE_TAG_MANAGER_ID');
 
 const googleOptimizePageHideCss = GAID && OPTID ?
   <style
-    dangerouslySetInnerHTML={{ __html: `.async-hide { opacity: 0 !important}` }}
+    dangerouslySetInnerHTML={{ __html: '.async-hide { opacity: 0 !important}' }}
   />
   : null;
 
