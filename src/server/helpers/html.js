@@ -35,10 +35,10 @@ const googleAnalytics = GAID && OPTID ?
     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
     ga('create', '${GAID}', {'allowLinker': true});
     ga('require', 'linker');
-    ga('linker:autoLink', ['snapcraft.io, build.snapcraft.io, dashboard.snapcraft.io,
-    conjure-up.io, login.ubuntu.com, www.ubuntu.com, ubuntu.com, insights.ubuntu.com,
-    developer.ubuntu.com, cn.ubuntu.com, design.ubuntu.com, maas.io, canonical.com,
-    landscape.canonical.com, pages.ubuntu.com, tutorials.ubuntu.com, docs.ubuntu.com']);
+    ga('linker:autoLink', ['snapcraft.io', 'build.snapcraft.io', 'dashboard.snapcraft.io',
+    'conjure-up.io', 'login.ubuntu.com', 'www.ubuntu.com', 'ubuntu.com', 'insights.ubuntu.com',
+    'developer.ubuntu.com', 'cn.ubuntu.com', 'design.ubuntu.com', 'maas.io', 'canonical.com',
+    'landscape.canonical.com', 'pages.ubuntu.com', 'tutorials.ubuntu.com', 'docs.ubuntu.com']);
     ga('require', '${OPTID}');` }}
   />
  : null;
