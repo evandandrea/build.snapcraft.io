@@ -12,7 +12,7 @@ const history = syncHistoryWithStore(browserHistory, store);
 
 export default class Root extends Component {
 
-  componentWillMount() {
+  componentDidMount() {
     /*
      Create Google Analytics Events when the page in this SPA has changed.
     */
